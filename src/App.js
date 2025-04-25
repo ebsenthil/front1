@@ -50,29 +50,24 @@ function App() {
   };
 
   const handleGeneratePDF = async () => {
-    try {
-      setPdfLoading(true);
-      const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          resume: editedText
-        })
-      });
+  try {
+    const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume: editedText })  // ✅ Send GPT-generated & edited resume
+    });
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "resume.pdf";
-      a.click();
-    } catch (err) {
-      console.error("PDF generation failed", err);
-    } finally {
-      setPdfLoading(false);
-    }
-  };
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "resume.pdf";
+    a.click();
+  } catch (err) {
+    console.error("PDF generation failed", err);
+  }
+};
+
 
   return (
     <div className="App container">
