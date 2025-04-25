@@ -24,10 +24,11 @@ function App() {
 
   const handleGenerateResume = async () => {
     try {
+      const { jobDescription, ...resumeData } = formData; // omit jobDescription
       const response = await fetch("https://2neudt4y81.execute-api.us-east-1.amazonaws.com/dev/resume-view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(resumeData)
       });
 
       const data = await response.json();
@@ -45,12 +46,13 @@ function App() {
 
   const handleGeneratePDF = async () => {
     try {
+      const { jobDescription, ...resumeData } = formData; // omit jobDescription
       const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          experience: editedText // Send final text back for PDF generation
+          ...resumeData,
+          experience: editedText // updated experience content from editor
         })
       });
 
