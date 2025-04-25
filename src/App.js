@@ -3,8 +3,17 @@ import "./App.css";
 
 function App() {
   const [formData, setFormData] = useState({
-    name: "", email: "", phone: "", linkedin: "",
-    education: "", experience: "", certifications: "", skills: "", jobDescription: ""
+    name: "",
+    email: "",
+    phone: "",
+    linkedin: "",
+    role: "", // inferred from jobDescription or entered
+    summary: "",
+    education: "",
+    experience: "",
+    certifications: "",
+    skills: "",
+    jobDescription: ""
   });
 
   const [resumeText, setResumeText] = useState("");
@@ -38,15 +47,14 @@ function App() {
 
   const handleGeneratePDF = async () => {
     try {
-      const pdfPayload = {
-        ...formData,
-        experience: editedText // use updated text
-      };
-
+      const { jobDescription, ...pdfData } = formData; // omit jobDescription
       const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pdfPayload)
+        body: JSON.stringify({
+          ...pdfData,
+          experience: editedText
+        })
       });
 
       const blob = await response.blob();
@@ -56,7 +64,7 @@ function App() {
       a.download = "resume.pdf";
       a.click();
     } catch (err) {
-      console.error("PDF download failed", err);
+      console.error("PDF generation failed", err);
     }
   };
 
@@ -67,14 +75,14 @@ function App() {
 
       {stage === "form" && (
         <div className="form">
-          {Object.keys(formData).map((field) => (
+          {["name", "email", "phone", "linkedin", "role", "summary", "education", "experience", "certifications", "skills", "jobDescription"].map((field) => (
             <textarea
               key={field}
               name={field}
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
               value={formData[field]}
               onChange={handleChange}
-              rows={field === "experience" || field === "jobDescription" ? 5 : 2}
+              rows={field === "experience" || field === "jobDescription" || field === "summary" ? 5 : 2}
             />
           ))}
           <button onClick={handleGenerateResume}>Generate Resume</button>
@@ -84,7 +92,12 @@ function App() {
       {stage === "preview" && (
         <div className="editor">
           <h2>Preview and Edit Resume</h2>
-          <textarea rows={30} value={editedText} onChange={handleEditChange} />
+          <textarea
+            className="resume-preview"
+            rows={30}
+            value={editedText}
+            onChange={handleEditChange}
+          />
           <div className="btn-row">
             <button onClick={() => setStage("form")}>Back</button>
             <button className="download-btn" onClick={handleGeneratePDF}>Download PDF</button>
