@@ -5,6 +5,11 @@ body {
   padding: 0;
 }
 
+/* Ensures padding doesn't affect width calculations */
+* {
+  box-sizing: border-box;
+}
+
 .container {
   max-width: 800px;
   margin: 30px auto;
@@ -29,11 +34,19 @@ form {
 
 input,
 textarea {
+  width: 100%; /* Full-width inputs & textareas */
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1em;
   transition: border 0.3s;
+}
+
+/* Improved textarea styling */
+textarea {
+  min-height: 120px; /* More visible text area */
+  font-family: 'Segoe UI', sans-serif; /* Consistent font */
+  resize: vertical; /* Allows vertical resizing */
 }
 
 input:focus,
@@ -87,4 +100,3 @@ button:hover {
   font-weight: bold;
   margin-top: 10px;
 }
-
