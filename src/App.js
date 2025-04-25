@@ -7,15 +7,16 @@ function App() {
     email: "",
     phone: "",
     linkedin: "",
-    experience: "",
     education: "",
+    experience: "",
+    certifications: "",
     skills: "",
-    summary: ""
+    jobDescription: ""
   });
 
   const [resumeText, setResumeText] = useState("");
   const [editedText, setEditedText] = useState("");
-  const [stage, setStage] = useState("form"); // form → preview → pdf
+  const [stage, setStage] = useState("form");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,7 +48,10 @@ function App() {
       const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume: editedText })
+        body: JSON.stringify({
+          ...formData,
+          experience: editedText // Send final text back for PDF generation
+        })
       });
 
       const blob = await response.blob();
@@ -62,18 +66,30 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App container">
       <h1>AI Resume Generator</h1>
+      <div className="subheading">Create and download an ATS-friendly resume</div>
 
       {stage === "form" && (
         <div className="form">
-          {["name", "email", "phone", "linkedin", "summary", "experience", "education", "skills"].map((field) => (
+          {[
+            "name",
+            "email",
+            "phone",
+            "linkedin",
+            "education",
+            "experience",
+            "certifications",
+            "skills",
+            "jobDescription"
+          ].map((field) => (
             <textarea
               key={field}
               name={field}
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
               value={formData[field]}
               onChange={handleChange}
+              rows={field === "experience" || field === "jobDescription" ? 5 : 2}
             />
           ))}
           <button onClick={handleGenerateResume}>Generate Resume</button>
@@ -90,7 +106,7 @@ function App() {
           />
           <div className="btn-row">
             <button onClick={() => setStage("form")}>Back</button>
-            <button onClick={handleGeneratePDF}>Download PDF</button>
+            <button className="download-btn" onClick={handleGeneratePDF}>Download PDF</button>
           </div>
         </div>
       )}
