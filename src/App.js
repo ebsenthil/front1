@@ -3,22 +3,15 @@ import "./App.css";
 
 function App() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    linkedin: "",
-    role: "", // inferred from jobDescription or entered
-    summary: "",
-    education: "",
-    experience: "",
-    certifications: "",
-    skills: "",
-    jobDescription: ""
+    name: "", email: "", phone: "", linkedin: "",
+    education: "", experience: "", certifications: "",
+    skills: "", jobDescription: ""
   });
 
   const [resumeText, setResumeText] = useState("");
   const [editedText, setEditedText] = useState("");
   const [stage, setStage] = useState("form");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,6 +19,9 @@ function App() {
 
   const handleGenerateResume = async () => {
     try {
+      setLoading(true);
+      const { jobDescription, ...resumeData } = formData;
+
       const response = await fetch("https://2neudt4y81.execute-api.us-east-1.amazonaws.com/dev/resume-view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,6 +34,8 @@ function App() {
       setStage("preview");
     } catch (err) {
       console.error("Resume generation failed", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,14 +45,10 @@ function App() {
 
   const handleGeneratePDF = async () => {
     try {
-      const { jobDescription, ...pdfData } = formData; // omit jobDescription
       const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...pdfData,
-          experience: editedText
-        })
+        body: JSON.stringify({ resume: editedText })
       });
 
       const blob = await response.blob();
@@ -75,17 +69,23 @@ function App() {
 
       {stage === "form" && (
         <div className="form">
-          {["name", "email", "phone", "linkedin", "role", "summary", "education", "experience", "certifications", "skills", "jobDescription"].map((field) => (
+          {[
+            "name", "email", "phone", "linkedin",
+            "education", "experience", "certifications", "skills", "jobDescription"
+          ].map((field) => (
             <textarea
               key={field}
               name={field}
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
               value={formData[field]}
               onChange={handleChange}
-              rows={field === "experience" || field === "jobDescription" || field === "summary" ? 5 : 2}
+              rows={field === "experience" || field === "jobDescription" ? 5 : 2}
+              required
             />
           ))}
-          <button onClick={handleGenerateResume}>Generate Resume</button>
+          <button onClick={handleGenerateResume} disabled={loading}>
+            {loading ? "Generating..." : "Generate Resume"}
+          </button>
         </div>
       )}
 
@@ -93,7 +93,6 @@ function App() {
         <div className="editor">
           <h2>Preview and Edit Resume</h2>
           <textarea
-            className="resume-preview"
             rows={30}
             value={editedText}
             onChange={handleEditChange}
