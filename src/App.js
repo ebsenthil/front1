@@ -3,15 +3,22 @@ import "./App.css";
 
 function App() {
   const [formData, setFormData] = useState({
-    name: "", email: "", phone: "", linkedin: "",
-    education: "", experience: "", certifications: "",
-    skills: "", jobDescription: ""
+    name: "",
+    email: "",
+    phone: "",
+    linkedin: "",
+    education: "",
+    experience: "",
+    certifications: "",
+    skills: "",
+    jobDescription: ""
   });
 
   const [resumeText, setResumeText] = useState("");
   const [editedText, setEditedText] = useState("");
   const [stage, setStage] = useState("form");
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,11 +28,10 @@ function App() {
     try {
       setLoading(true);
       const { jobDescription, ...resumeData } = formData;
-
       const response = await fetch("https://2neudt4y81.execute-api.us-east-1.amazonaws.com/dev/resume-view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(resumeData)
       });
 
       const data = await response.json();
@@ -45,10 +51,14 @@ function App() {
 
   const handleGeneratePDF = async () => {
     try {
+      setPdfLoading(true);
       const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume: editedText })
+        body: JSON.stringify({
+          ...formData,
+          resume: editedText
+        })
       });
 
       const blob = await response.blob();
@@ -59,6 +69,8 @@ function App() {
       a.click();
     } catch (err) {
       console.error("PDF generation failed", err);
+    } finally {
+      setPdfLoading(false);
     }
   };
 
@@ -70,8 +82,15 @@ function App() {
       {stage === "form" && (
         <div className="form">
           {[
-            "name", "email", "phone", "linkedin",
-            "education", "experience", "certifications", "skills", "jobDescription"
+            "name",
+            "email",
+            "phone",
+            "linkedin",
+            "education",
+            "experience",
+            "certifications",
+            "skills",
+            "jobDescription"
           ].map((field) => (
             <textarea
               key={field}
@@ -80,7 +99,6 @@ function App() {
               value={formData[field]}
               onChange={handleChange}
               rows={field === "experience" || field === "jobDescription" ? 5 : 2}
-              required
             />
           ))}
           <button onClick={handleGenerateResume} disabled={loading}>
@@ -90,16 +108,19 @@ function App() {
       )}
 
       {stage === "preview" && (
-        <div className="editor">
+        <div className="editor-container">
           <h2>Preview and Edit Resume</h2>
           <textarea
+            className="editor"
             rows={30}
             value={editedText}
             onChange={handleEditChange}
           />
           <div className="btn-row">
             <button onClick={() => setStage("form")}>Back</button>
-            <button className="download-btn" onClick={handleGeneratePDF}>Download PDF</button>
+            <button className="download-btn" onClick={handleGeneratePDF} disabled={pdfLoading}>
+              {pdfLoading ? "Creating PDF..." : "Download PDF"}
+            </button>
           </div>
         </div>
       )}
