@@ -1,194 +1,136 @@
-/* App.css - Professional Styling Update */
-
-/* --- Base Styles & Variables --- */
-:root {
-  --primary-color: #0d47a1; /* Deep Blue */
-  --secondary-color: #1976d2; /* Medium Blue */
-  --accent-color: #29b6f6; /* Light Blue */
-  --success-color: #388e3c; /* Green */
-  --success-hover-color: #2e7d32;
-  --light-grey: #f4f7fa;
-  --medium-grey: #e0e0e0;
-  --dark-grey: #424242;
-  --text-color: #212121;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 body {
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
-  background-color: var(--light-grey);
-  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7fa;
   margin: 0;
   padding: 0;
-  line-height: 1.6;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* --- Container & Layout --- */
 .container {
-  max-width: 800px; /* Slightly narrower for better readability */
-  margin: 40px auto; /* More vertical margin */
-  padding: 30px 40px; /* More padding */
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 25px;
   background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Typography --- */
 h1 {
   text-align: center;
-  font-size: 2.5em; /* Larger */
-  color: var(--primary-color);
-  margin-bottom: 15px;
-  font-weight: 600;
+  font-size: 2.5em;
+  color: #2c3e50;
 }
 
 .subheading {
   text-align: center;
-  font-size: 1.1em; /* Slightly larger */
-  color: var(--dark-grey);
-  margin-bottom: 40px; /* More space before form */
+  font-size: 1.1em;
+  color: #616161;
+  margin-bottom: 25px;
 }
 
-h2 {
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--medium-grey);
-    padding-bottom: 10px;
-    font-weight: 500;
-}
-
-/* --- Form Styling --- */
-.form,
-.editor-container {
+form {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Increased gap */
+  gap: 15px;
 }
 
-/* Use labels for better accessibility and structure (optional but recommended in App.js) */
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--dark-grey);
-}
-
-input, /* Keep input styles if you add any */
 textarea {
   width: 100%;
-  padding: 15px; /* More padding */
-  border: 1px solid var(--medium-grey);
-  border-radius: var(--border-radius);
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
   font-size: 1em;
-  transition: border-color 0.3s, box-shadow 0.3s;
   resize: vertical;
-  background-color: #fff; /* Ensure white background */
 }
 
-textarea {
-    min-height: 60px; /* Default min height */
-}
-
-textarea[name="experience"],
-textarea[name="jobDescription"],
-textarea[name="skills"] {
-    min-height: 120px; /* Taller for longer fields */
-}
-
-
-input:focus,
 textarea:focus {
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2); /* Focus ring */
+  border-color: #3498db;
   outline: none;
 }
 
-/* --- Button Styling --- */
 button {
-  padding: 14px 20px; /* More padding */
+  padding: 12px;
+  background-color: #3498db;
   border: none;
-  border-radius: var(--border-radius);
-  font-size: 1.05em; /* Slightly larger text */
-  font-weight: 500; /* Medium weight */
-  background-color: var(--secondary-color);
+  border-radius: 8px;
   color: white;
+  font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  text-align: center;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: var(--primary-color); /* Darker blue on hover */
-  transform: translateY(-1px); /* Subtle lift */
-}
-
-button:active {
-    transform: translateY(0px); /* Press down effect */
-}
-
-button:disabled {
-  background-color: #bdbdbd; /* Grey out disabled */
-  cursor: not-allowed;
-  transform: none;
+  background-color: #2980b9;
 }
 
 .download-btn {
-  background-color: var(--success-color); /* Green for download */
+  background-color: #2ecc71;
+  margin-top: 10px;
 }
 
 .download-btn:hover {
-  background-color: var(--success-hover-color); /* Darker green */
+  background-color: #27ae60;
 }
 
-.btn-row {
-  display: flex;
-  justify-content: space-between; /* Space out buttons */
-  gap: 15px;
-  margin-top: 25px;
+.resume-card {
+  margin-top: 20px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
 }
 
-/* --- Editor Specific Styling --- */
-.editor-container h2 {
-    text-align: center; /* Center the preview heading */
+.resume-card .header {
+  text-align: center;
 }
 
-textarea.editor {
-  font-family: 'Consolas', 'Monaco', monospace; /* Monospace for code-like text */
-  min-height: 450px; /* Taller editor */
-  border: 1px solid var(--medium-grey);
-  background-color: #fdfdfd; /* Very light background */
-  line-height: 1.5; /* Adjust line height for readability */
+.resume-card .role {
+  font-style: italic;
+  color: #555;
+}
+
+.resume-card .contact {
+  margin-top: 8px;
+  font-size: 0.95em;
   color: #333;
 }
 
-/* --- Responsive Adjustments --- */
-@media (max-width: 768px) {
-  .container {
-    margin: 20px auto;
-    padding: 20px;
-  }
-
-  h1 {
-    font-size: 2em;
-  }
-
-  .subheading {
-    font-size: 1em;
-    margin-bottom: 30px;
-  }
-
-  input, textarea, button {
-    padding: 12px;
-    font-size: 0.95em;
-  }
-
-  .btn-row {
-    flex-direction: column; /* Stack buttons on small screens */
-  }
+section h3 {
+  margin-top: 15px;
+  color: #1565c0;
 }
 
+section p {
+  margin-left: 10px;
+}
+
+/* Loading spinner */
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 1rem;
+  color: #1976d2;
+}
+
+.success {
+  text-align: center;
+  margin-top: 15px;
+  color: green;
+  font-weight: bold;
+}
