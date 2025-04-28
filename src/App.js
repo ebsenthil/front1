@@ -18,10 +18,22 @@ function App() {
 
     const [formData, setFormData] = useState(initialFormData);
     const [editedData, setEditedData] = useState(null);
-    const [stage, setStage] = useState("form"); // 'form', 'preview'
+    const [stage, setStage] = useState("form");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+
+    const validateEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email === "";
+    };
+
+    const validatePhone = (phone) => {
+        return /^\+?\d{10,15}$/.test(phone) || phone === "";
+    };
+
+    const validateLinkedIn = (linkedin) => {
+        return /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?$/.test(linkedin) || linkedin === "";
+    };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,10 +57,27 @@ function App() {
         setError("");
         setSuccessMessage("");
 
+        // Validate inputs
         if (!formData.name || !formData.jobDescription) {
             setError("Please provide at least your Name and the Job Description.");
             setLoading(false);
             return;
+        }
+        if (!validateEmail(formData.email)) {
+            setError("Please provide a valid email or leave it empty.");
+            setLoading(false);
+            return;
+        }
+        if (!validatePhone(formData.phone)) {
+            setError("Please provide a valid phone number (10-15 digits) or leave it empty.");
+            setLoading(false);
+            return;
+        }
+        if (!validateLinkedIn(formData.linkedin)) {
+            setError("Please provide a valid LinkedIn URL (e.g., https://linkedin.com/in/username) or leave it empty.");
+            WWII setLoading(false);
+            setError("");
+            setSuccessMessage("");
         }
 
         try {
@@ -64,8 +93,12 @@ function App() {
                 throw new Error(data.error || `HTTP error! status: ${response.status}`);
             }
 
+            // Sanitize contact fields
             const formattedData = {
                 ...data,
+                email: validateEmail(data.email) ? data.email : "Not Provided",
+                phone: validatePhone(data.phone) ? data.phone : "Not Provided",
+                linkedin: validateLinkedIn(data.linkedin) ? data.linkedin : "Not Provided",
                 skills: Array.isArray(data.skills) ? data.skills : (data.skills ? String(data.skills).split(/,|\n/).map(s => s.trim()).filter(Boolean) : []),
                 experience: Array.isArray(data.experience) ? data.experience : (data.experience ? [{ responsibilities: String(data.experience).split('\n').filter(Boolean) }] : []),
                 education: Array.isArray(data.education) ? data.education : (data.education ? String(data.education).split('\n').map(s => s.trim()).filter(Boolean) : []),
@@ -192,7 +225,6 @@ function App() {
             <h1>AI Resume Generator</h1>
             <p className="subheading">Generate an ATS-friendly resume tailored to a job description.</p>
 
-            {/* Informational Sections */}
             <div className="info-section-container">
                 <div className="info-card why-use">
                     <h2>Beat the Bots & Get Noticed!</h2>
@@ -222,11 +254,9 @@ function App() {
                 </div>
             </div>
 
-            {/* Error and Success Messages */}
             {error && <div className="error-toast">{error}</div>}
             {successMessage && !loading && <div className="success-toast">{successMessage}</div>}
 
-            {/* Form Stage */}
             {stage === "form" && (
                 <div className="form">
                     {Object.keys(formData).map((field) => (
@@ -235,7 +265,7 @@ function App() {
                             <textarea
                                 id={field}
                                 name={field}
-                                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}... ${field === 'experience' ? '(separate roles clearly)' : ''}`}
+                                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}... ${field === 'experience' ? '(e.g., Software Engineer at XYZ Corp, 2020-2022, Developed features...)' : ''}`}
                                 value={formData[field]}
                                 onChange={handleChange}
                                 rows={field === "experience" || field === "jobDescription" ? 5 : 2}
@@ -256,7 +286,6 @@ function App() {
                 </div>
             )}
 
-            {/* Preview Stage */}
             {stage === "preview" && editedData && (
                 <div className="resume-card">
                     <div className="resume-header">
@@ -283,11 +312,41 @@ function App() {
                             disabled={loading}
                         />
                         <div className="contact-info">
-                            <label htmlFor="preview-phone">Contact</label>
+                            <label>Contact Information</label>
                             <div>
-                                📞 <input type="tel" id="preview-phone" name="phone" value={editedData.phone || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Phone" disabled={loading} /> |
-                                ✉️ <input type="email" id="preview-email" name="email" value={editedData.email || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Email" disabled={loading} /> |
-                                🔗 <input type="url" id="preview-linkedin" name="linkedin" value={editedData.linkedin || ''} onChange={handleEditedChange} className="edit-inline" placeholder="LinkedIn URL (Optional)" disabled={loading} />
+                                <span>Email: </span>
+                                <input
+                                    type="email"
+                                    id="preview-email"
+                                    name="email"
+                                    value={editedData.email || ''}
+                                    onChange={handleEditedChange}
+                                    className="edit-inline"
+                                    placeholder="Email"
+                                    disabled={loading}
+                                />
+                                <span> | Phone: </span>
+                                <input
+                                    type="tel"
+                                    id="preview-phone"
+                                    name="phone"
+                                    value={editedData.phone || ''}
+                                    onChange={handleEditedChange}
+                                    className="edit-inline"
+                                    placeholder="Phone"
+                                    disabled={loading}
+                                />
+                                <span> | LinkedIn: </span>
+                                <input
+                                    type="url"
+                                    id="preview-linkedin"
+                                    name="linkedin"
+                                    value={editedData.linkedin || ''}
+                                    onChange={handleEditedChange}
+                                    className="edit-inline"
+                                    placeholder="LinkedIn URL (Optional)"
+                                    disabled={loading}
+                                />
                             </div>
                         </div>
                     </div>
@@ -316,7 +375,7 @@ function App() {
                         {renderTextArea("education", 3)}
                     </section>
 
-                    { (editedData.certifications && (Array.isArray(editedData.certifications) ? editedData.certifications.length > 0 : String(editedData.certifications).trim() !== '')) && (
+                    {(editedData.certifications && (Array.isArray(editedData.certifications) ? editedData.certifications.length > 0 : String(editedData.certifications).trim() !== '')) && (
                         <>
                             <hr />
                             <section>
@@ -326,7 +385,7 @@ function App() {
                         </>
                     )}
 
-                    { (editedData.languages && (Array.isArray(editedData.languages) ? editedData.languages.length > 0 : String(editedData.languages).trim() !== '')) && (
+                    {(editedData.languages && (Array.isArray(editedData.languages) ? editedData.languages.length > 0 : String(editedData.languages).trim() !== '')) && (
                         <>
                             <hr />
                             <section>
@@ -336,7 +395,7 @@ function App() {
                         </>
                     )}
 
-                    { (editedData.extracurricular && (Array.isArray(editedData.extracurricular) ? editedData.extracurricular.length > 0 : String(editedData.extracurricular).trim() !== '')) && (
+                    {(editedData.extracurricular && (Array.isArray(editedData.extracurricular) ? editedData.extracurricular.length > 0 : String(editedData.extracurricular).trim() !== '')) && (
                         <>
                             <hr />
                             <section>
@@ -347,7 +406,15 @@ function App() {
                     )}
 
                     <div className="button-group preview-buttons">
-                        <button onClick={() => { setStage("form"); setError(''); setSuccessMessage(''); }} disabled={loading} className="back-btn">
+                        <button
+                            onClick={() => {
+                                setStage("form");
+                                setError('');
+                                setSuccessMessage('');
+                            }}
+                            disabled={loading}
+                            className="back-btn"
+                        >
                             ← Back to Edit Input
                         </button>
                         <button onClick={handleReset} className="reset-btn" disabled={loading}>
