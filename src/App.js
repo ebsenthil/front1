@@ -30,7 +30,7 @@ function App() {
     try {
       setLoading(true);
       setSuccessMessage("");
-      const response = await fetch("https://https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
+      const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
