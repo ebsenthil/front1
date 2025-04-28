@@ -1,15 +1,3 @@
-import Amplify from 'aws-amplify';
-
-Amplify.configure({
-  Auth: {
-    region: 'us-east-1', // <--- Your region
-    userPoolId: 'us-east-1_UL0HgN1a7', // <--- Your User Pool ID
-    userPoolWebClientId: '25naou2ejmro1jobjqkd0chkj0', // <--- Your App Client ID
-    mandatorySignIn: true,
-    authenticationFlowType: 'USER_PASSWORD_AUTH',
-  }
-});
-
 import React, { useState } from "react";
 import "./App.css";
 
