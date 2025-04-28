@@ -12,6 +12,8 @@
   --error-text: #721c24;
   --success-bg: #d4edda;
   --success-text: #155724;
+  --info-bg: #eaf2f8; /* Background for info cards */
+  --info-border: #aed6f1; /* Border for info cards */
   --border-radius: 8px;
   --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   --input-border: #ccc;
@@ -54,8 +56,81 @@ h1 {
   text-align: center;
   font-size: 1.1rem; /* Slightly smaller */
   color: var(--dark-grey);
-  margin-bottom: 40px; /* More space below subheading */
+  margin-bottom: 30px; /* Space below subheading */
 }
+
+/* --- Informational Section Styles --- */
+.info-section-container {
+  display: grid; /* Use grid for layout */
+  grid-template-columns: 1fr; /* Default to single column */
+  gap: 25px; /* Space between cards */
+  margin-top: 20px; /* Space above the section */
+  margin-bottom: 40px; /* Space below the section */
+}
+
+/* On wider screens, display side-by-side */
+@media (min-width: 768px) {
+  .info-section-container {
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+  }
+}
+
+.info-card {
+  background-color: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: var(--border-radius);
+  padding: 20px 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.info-card h2 {
+  font-size: 1.4rem;
+  color: var(--primary-hover); /* Darker blue for heading */
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--info-border);
+  padding-bottom: 8px;
+}
+
+.info-card p,
+.info-card li {
+  font-size: 0.95rem; /* Slightly smaller font for info text */
+  color: var(--secondary-color);
+  margin-bottom: 10px; /* Space between paragraphs/list items */
+  line-height: 1.7; /* Improve readability */
+}
+
+.info-card ul,
+.info-card ol {
+  padding-left: 25px; /* Indent lists */
+  margin-top: 0;
+}
+
+.info-card li {
+    margin-bottom: 8px;
+}
+
+.info-card strong {
+    color: var(--primary-hover); /* Highlight strong text */
+    font-weight: 600; /* Make strong text bolder */
+}
+
+.info-card em {
+    color: var(--dark-grey);
+    font-style: italic;
+}
+
+.info-card code { /* Style for field names */
+  background-color: #ddecf8;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  color: #2c3e50;
+  border: 1px solid #c6dcea;
+}
+/* --- END Informational Section Styles --- */
+
 
 /* --- Form Styling --- */
 .form {
@@ -104,7 +179,8 @@ input[type="url"]:focus {
 
 textarea[required], input[required] {
     /* Optional: Add a visual cue for required fields */
-    /* border-left: 3px solid var(--primary-color); */
+    border-left: 3px solid var(--primary-color);
+    padding-left: 12px;
 }
 
 /* --- Button Styling --- */
@@ -116,21 +192,22 @@ button {
   font-weight: 500; /* Medium weight */
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
+  transition: background-color 0.3s, transform 0.1s, box-shadow 0.2s;
   display: inline-flex; /* Align icon/text if needed */
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
-button:hover {
+button:hover:not(:disabled) { /* Only apply hover effect if not disabled */
   transform: translateY(-2px); /* Slight lift on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-button:active {
+button:active:not(:disabled) {
     transform: translateY(0); /* Reset lift on click */
-    box-shadow: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Smaller shadow on click */
 }
 
 
@@ -145,21 +222,21 @@ button:disabled {
 .generate-btn, .download-btn {
   background-color: var(--primary-color);
 }
-.generate-btn:hover, .download-btn:hover {
+.generate-btn:hover:not(:disabled), .download-btn:hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
 
 .reset-btn {
   background-color: #e74c3c; /* A stronger red */
 }
-.reset-btn:hover {
+.reset-btn:hover:not(:disabled) {
   background-color: #c0392b;
 }
 
 .back-btn {
   background-color: var(--dark-grey);
 }
-.back-btn:hover {
+.back-btn:hover:not(:disabled) {
   background-color: var(--secondary-color);
 }
 
@@ -192,6 +269,7 @@ button:disabled {
     color: var(--dark-grey);
     margin-top: 10px;
     margin-bottom: 3px;
+    font-weight: 500;
 }
 
 
@@ -200,11 +278,19 @@ button:disabled {
     padding: 8px 12px;
     margin-bottom: 5px;
     background-color: #fdfdfd; /* Slightly off-white */
+    width: 100%;
+    max-width: 500px; /* Limit width of centered fields */
+    margin-left: auto;
+    margin-right: auto;
+    display: block; /* Ensure block display for centering */
+    border-radius: 4px;
 }
 .edit-field:focus {
     border-style: solid;
     border-color: var(--input-focus-border);
     background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 .name-field {
@@ -215,10 +301,12 @@ button:disabled {
     border-bottom: 1px dashed var(--medium-grey);
     border-radius: 0;
     margin-bottom: 0;
+    padding: 10px 12px;
 }
 .name-field:focus {
      border-bottom-style: solid;
      box-shadow: none;
+     background-color: #f0f6fc;
 }
 
 
@@ -231,10 +319,12 @@ button:disabled {
     border-bottom: 1px dashed var(--medium-grey);
     border-radius: 0;
     margin-bottom: 15px; /* Space before contact */
+     padding: 8px 12px;
 }
 .role-field:focus {
      border-bottom-style: solid;
      box-shadow: none;
+     background-color: #f0f6fc;
 }
 
 
@@ -251,7 +341,7 @@ button:disabled {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 5px 10px; /* Vertical and horizontal gap */
 }
 
 .edit-inline { /* For phone, email, linkedin */
@@ -262,6 +352,8 @@ button:disabled {
     background-color: transparent;
     border-radius: 0;
     margin: 0 5px; /* Spacing around icons/text */
+    text-align: center;
+    min-width: 150px; /* Ensure minimum width */
 }
 .edit-inline:focus {
     border-bottom-style: solid;
@@ -320,7 +412,7 @@ button:disabled {
   border-radius: var(--border-radius);
   text-align: center;
   font-weight: 500;
-  max-width: 80%; /* Prevent full width */
+  max-width: 90%; /* Limit width slightly */
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -328,6 +420,7 @@ button:disabled {
   background-color: var(--error-bg);
   color: var(--error-text);
   border: 1px solid var(--error-text);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .success-toast {
@@ -341,6 +434,7 @@ button:disabled {
   background-color: var(--light-grey);
   color: var(--secondary-color);
   font-style: italic;
+   animation: fadeIn 0.5s ease-out;
 }
 
 /* --- Animations --- */
@@ -352,7 +446,7 @@ button:disabled {
 /* --- Responsiveness --- */
 @media (max-width: 768px) {
   .container {
-    padding: 20px;
+    padding: 20px 15px; /* Reduce padding on smaller screens */
   }
   h1 {
     font-size: 2.2rem;
@@ -369,5 +463,31 @@ button:disabled {
   .edit-inline {
     text-align: center;
     width: 80%; /* Adjust width for stacked view */
+     min-width: auto; /* Remove min-width */
   }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2rem;
+    }
+     .subheading {
+        font-size: 1rem;
+     }
+     .info-card h2 {
+         font-size: 1.2rem;
+     }
+      .info-card p, .info-card li {
+         font-size: 0.9rem;
+     }
+     .name-field {
+         font-size: 1.5rem;
+     }
+     .role-field {
+         font-size: 1.1rem;
+     }
+      button {
+          padding: 10px 20px;
+          font-size: 0.95rem;
+      }
 }
