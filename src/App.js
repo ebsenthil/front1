@@ -27,26 +27,26 @@ function App() {
   };
 
   const handleGenerateResume = async () => {
-    try {
-      setLoading(true);
-      setSuccessMessage("");
-      const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+  try {
+    setLoading(true);
+    setSuccessMessage("");
+    const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData)
+    });
 
-      const data = await response.json();
-      setResumeData(data.resume);
-      setEditedData(data.resume);
-      setStage("preview");
-      setSuccessMessage("✅ Resume generated successfully!");
-    } catch (err) {
-      console.error("Resume generation failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await response.json();
+    setResumeData(data);
+    setEditedData(data);
+    setStage("preview");
+    setSuccessMessage("✅ Resume generated successfully!");
+  } catch (err) {
+    console.error("Resume generation failed", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEditChange = (e) => {
     setEditedData({ ...editedData, [e.target.name]: e.target.value });
