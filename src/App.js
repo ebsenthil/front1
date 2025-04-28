@@ -17,36 +17,38 @@ function App() {
   });
 
   const [resumeData, setResumeData] = useState(null);
-  const [editedData, setEditedData] = useState(null);
-  const [stage, setStage] = useState("form"); // form → preview
+  const [editedData, setEditedData] = useState({});
+  const [stage, setStage] = useState("form");
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleGenerateResume = async () => {
-  try {
-    setLoading(true);
-    setSuccessMessage("");
-    const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData)
-    });
+    try {
+      setLoading(true);
+      setToastMessage("");
 
-    const data = await response.json();
-    setResumeData(data);
-    setEditedData(data);
-    setStage("preview");
-    setSuccessMessage("✅ Resume generated successfully!");
-  } catch (err) {
-    console.error("Resume generation failed", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      setResumeData(data);  // 🚀 save entire structured JSON
+      setEditedData(data);  // 🚀 editable copy
+      setStage("preview");
+      showToast("✅ Resume generated successfully!");
+    } catch (err) {
+      console.error("Resume generation failed", err);
+      showToast("❌ Failed to generate resume");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditChange = (e) => {
     setEditedData({ ...editedData, [e.target.name]: e.target.value });
@@ -55,7 +57,8 @@ function App() {
   const handleDownloadPDF = async () => {
     try {
       setLoading(true);
-      setSuccessMessage("");
+      setToastMessage("");
+
       const response = await fetch("https://e73kxnqelj.execute-api.us-east-1.amazonaws.com/dev/resume-pdf2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,12 +71,38 @@ function App() {
       a.href = url;
       a.download = "resume.pdf";
       a.click();
-      setSuccessMessage("✅ PDF downloaded successfully!");
+      showToast("✅ PDF downloaded successfully!");
     } catch (err) {
       console.error("PDF generation failed", err);
+      showToast("❌ Failed to download PDF");
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      linkedin: "",
+      education: "",
+      experience: "",
+      certifications: "",
+      skills: "",
+      languages: "",
+      extracurricular: "",
+      jobDescription: ""
+    });
+    setResumeData(null);
+    setEditedData({});
+    setStage("form");
+    setToastMessage("");
+  };
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(""), 3000);
   };
 
   return (
@@ -105,16 +134,15 @@ function App() {
               rows={field === "experience" || field === "jobDescription" ? 5 : 2}
             />
           ))}
-          <button onClick={handleGenerateResume} disabled={loading}>
-            {loading ? "Generating..." : "Generate Resume"}
-          </button>
 
-          {loading && (
-            <>
-              <div className="loader"></div>
-              <div className="loading-text">Generating your resume...</div>
-            </>
-          )}
+          <div className="button-group">
+            <button onClick={handleGenerateResume} disabled={loading}>
+              {loading ? "Generating..." : "Generate Resume"}
+            </button>
+            <button onClick={resetForm} className="reset-btn" disabled={loading}>
+              Clear
+            </button>
+          </div>
         </div>
       )}
 
@@ -139,21 +167,33 @@ function App() {
 
           <section>
             <h3>Skills</h3>
-            <p>{editedData.skills}</p>
+            <ul>
+              {Array.isArray(editedData.skills) ? editedData.skills.map((skill, idx) => <li key={idx}>{skill}</li>) : <li>{editedData.skills}</li>}
+            </ul>
           </section>
 
           <hr />
 
           <section>
             <h3>Experience</h3>
-            <p>{editedData.experience}</p>
+            {Array.isArray(editedData.experience) && editedData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <strong>{exp.title} | {exp.company}</strong><br />
+                <em>{exp.location} | {exp.period}</em>
+                <ul>
+                  {exp.responsibilities.map((resp, rIdx) => <li key={rIdx}>{resp}</li>)}
+                </ul>
+              </div>
+            ))}
           </section>
 
           <hr />
 
           <section>
             <h3>Education</h3>
-            <p>{editedData.education}</p>
+            <ul>
+              {Array.isArray(editedData.education) ? editedData.education.map((edu, idx) => <li key={idx}>{edu}</li>) : <li>{editedData.education}</li>}
+            </ul>
           </section>
 
           <hr />
@@ -161,7 +201,9 @@ function App() {
           {editedData.certifications && (
             <>
               <h3>Certifications</h3>
-              <p>{editedData.certifications}</p>
+              <ul>
+                {Array.isArray(editedData.certifications) ? editedData.certifications.map((cert, idx) => <li key={idx}>{cert}</li>) : <li>{editedData.certifications}</li>}
+              </ul>
               <hr />
             </>
           )}
@@ -169,7 +211,9 @@ function App() {
           {editedData.languages && (
             <>
               <h3>Languages</h3>
-              <p>{editedData.languages}</p>
+              <ul>
+                {Array.isArray(editedData.languages) ? editedData.languages.map((lang, idx) => <li key={idx}>{lang}</li>) : <li>{editedData.languages}</li>}
+              </ul>
               <hr />
             </>
           )}
@@ -177,7 +221,9 @@ function App() {
           {editedData.extracurricular && (
             <>
               <h3>Extra-Curricular Activities</h3>
-              <p>{editedData.extracurricular}</p>
+              <ul>
+                {Array.isArray(editedData.extracurricular) ? editedData.extracurricular.map((act, idx) => <li key={idx}>{act}</li>) : <li>{editedData.extracurricular}</li>}
+              </ul>
             </>
           )}
 
@@ -187,17 +233,10 @@ function App() {
               {loading ? "Preparing PDF..." : "Download PDF"}
             </button>
           </div>
-
-          {loading && (
-            <>
-              <div className="loader"></div>
-              <div className="loading-text">Preparing PDF...</div>
-            </>
-          )}
         </div>
       )}
 
-      {successMessage && <div className="success">{successMessage}</div>}
+      {toastMessage && <div className="toast">{toastMessage}</div>}
     </div>
   );
 }
