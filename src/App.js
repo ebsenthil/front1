@@ -30,7 +30,7 @@ function App() {
     try {
       setLoading(true);
       setSuccessMessage("");
-      const response = await fetch("https://2neudt4y81.execute-api.us-east-1.amazonaws.com/dev/resume-view", {
+      const response = await fetch("https://https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -56,7 +56,7 @@ function App() {
     try {
       setLoading(true);
       setSuccessMessage("");
-      const response = await fetch("https://lvpydfw4l6.execute-api.us-east-1.amazonaws.com/dev/resume-pdf", {
+      const response = await fetch("https://e73kxnqelj.execute-api.us-east-1.amazonaws.com/dev/resume-pdf2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editedData)
