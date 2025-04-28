@@ -1,4 +1,3 @@
-// App.js
 import React, { useState } from "react";
 import "./App.css"; // Make sure this path is correct
 
@@ -18,8 +17,6 @@ function App() {
     };
 
     const [formData, setFormData] = useState(initialFormData);
-    // No need for resumeData state if editedData holds the generated/edited content
-    // const [resumeData, setResumeData] = useState(null);
     const [editedData, setEditedData] = useState(null);
     const [stage, setStage] = useState("form"); // 'form', 'preview'
     const [loading, setLoading] = useState(false);
@@ -31,7 +28,6 @@ function App() {
     };
 
     const handleEditedChange = (e) => {
-        // Handle potential nested structure if needed later, for now assumes flat structure from preview
         setEditedData({ ...editedData, [e.target.name]: e.target.value });
     };
 
@@ -59,6 +55,7 @@ function App() {
 
 
         try {
+            // Replace with your actual API Gateway endpoint for resume generation
             const response = await fetch("https://2no2a0hmtd.execute-api.us-east-1.amazonaws.com/dev/resume-view2", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -72,20 +69,20 @@ function App() {
                 throw new Error(data.error || `HTTP error! status: ${response.status}`);
             }
 
-            // Ensure skills, experience, education etc are arrays if expected by preview/PDF
+            // Ensure skills, experience, education etc are arrays/structured if expected by preview/PDF
+            // Adjust parsing/splitting based on typical AI output format if needed
              const formattedData = {
                 ...data,
-                skills: Array.isArray(data.skills) ? data.skills : (data.skills ? data.skills.split(',').map(s => s.trim()) : []),
-                experience: Array.isArray(data.experience) ? data.experience : [], // Assuming experience is already structured correctly by AI
-                education: Array.isArray(data.education) ? data.education : (data.education ? data.education.split('\n') : []),
-                certifications: Array.isArray(data.certifications) ? data.certifications : (data.certifications ? data.certifications.split('\n') : []),
-                languages: Array.isArray(data.languages) ? data.languages : (data.languages ? data.languages.split(',').map(s => s.trim()) : []),
-                extracurricular: Array.isArray(data.extracurricular) ? data.extracurricular : (data.extracurricular ? data.extracurricular.split('\n') : []),
+                // Ensure values exist before trying to process them
+                skills: Array.isArray(data.skills) ? data.skills : (data.skills ? String(data.skills).split(/,|\n/).map(s => s.trim()).filter(Boolean) : []),
+                experience: Array.isArray(data.experience) ? data.experience : (data.experience ? [{ responsibilities: String(data.experience).split('\n').filter(Boolean) }] : []), // Basic fallback for experience if it's a string
+                education: Array.isArray(data.education) ? data.education : (data.education ? String(data.education).split('\n').map(s => s.trim()).filter(Boolean) : []),
+                certifications: Array.isArray(data.certifications) ? data.certifications : (data.certifications ? String(data.certifications).split('\n').map(s => s.trim()).filter(Boolean) : []),
+                languages: Array.isArray(data.languages) ? data.languages : (data.languages ? String(data.languages).split(/,|\n/).map(s => s.trim()).filter(Boolean) : []),
+                extracurricular: Array.isArray(data.extracurricular) ? data.extracurricular : (data.extracurricular ? String(data.extracurricular).split('\n').map(s => s.trim()).filter(Boolean) : []),
              };
 
 
-            // Set the state with the parsed data from the AI
-            // setResumeData(formattedData); // Not strictly needed if editedData is the primary source for preview
             setEditedData(formattedData); // This now holds the AI-generated resume object
             setStage("preview");
             setSuccessMessage("✅ Resume generated successfully! Review and edit below.");
@@ -109,6 +106,7 @@ function App() {
         setSuccessMessage("");
 
         try {
+             // Replace with your actual API Gateway endpoint for PDF generation
             const response = await fetch("https://e73kxnqelj.execute-api.us-east-1.amazonaws.com/dev/resume-pdf2", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -117,7 +115,6 @@ function App() {
             });
 
             if (!response.ok) {
-                // Try to get error message from response if possible
                  let errorData;
                  try {
                     errorData = await response.json();
@@ -131,13 +128,12 @@ function App() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            // Sanitize name for filename
             const safeName = editedData.name ? editedData.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'resume';
             a.download = `${safeName}_resume.pdf`;
-            document.body.appendChild(a); // Append to body to ensure click works in all browsers
+            document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url); // Clean up the object URL
-            a.remove(); // Clean up the anchor element
+            window.URL.revokeObjectURL(url);
+            a.remove();
             setSuccessMessage("✅ PDF downloaded successfully!");
 
         } catch (err) {
@@ -151,7 +147,7 @@ function App() {
     // Helper to render text areas for sections that might be simple strings or need joining
     const renderTextArea = (fieldName, rows = 3) => {
         let value = editedData[fieldName];
-        // If the data is expected to be an array in the PDF (like skills, education), join it for the textarea
+        // If the data is an array, join it for the textarea display
         if (Array.isArray(value)) {
             if (fieldName === 'skills' || fieldName === 'languages') {
                  value = value.join(", "); // Join skills/languages with comma
@@ -159,10 +155,13 @@ function App() {
                  value = value.join("\n"); // Join other list items with newline
             }
         }
+        // Handle potential non-string values safely
+        const displayValue = (typeof value === 'string' || typeof value === 'number') ? value : '';
+
         return (
             <textarea
                 name={fieldName}
-                value={value || ''} // Handle potential null/undefined
+                value={displayValue}
                 onChange={handleEditedChange}
                 rows={rows}
                 className="edit-area"
@@ -172,31 +171,40 @@ function App() {
         );
     };
 
-     // Helper to render experience which is an array of objects
+     // Helper to render experience which could be an array of objects or a string
      const renderExperienceEditor = () => {
-        // For simplicity in this example, we'll edit experience as a single text block.
-        // A more advanced editor would map over editedData.experience and provide fields for each job.
         let experienceString = "";
-        if (Array.isArray(editedData.experience)) {
-             experienceString = editedData.experience.map(job =>
-                 `Title: ${job.title || ''}\nCompany: ${job.company || ''}\nLocation: ${job.location || ''}\nPeriod: ${job.period || ''}\nResponsibilities:\n${(job.responsibilities || []).map(r => `- ${r}`).join("\n")}`
-             ).join("\n\n---\n\n"); // Separator between jobs
+        // Check if experience is an array of objects (expected structured format)
+        if (Array.isArray(editedData.experience) && editedData.experience.length > 0 && typeof editedData.experience[0] === 'object') {
+             experienceString = editedData.experience.map(job => {
+                const title = job.title || '';
+                const company = job.company || '';
+                const location = job.location || '';
+                const period = job.period || '';
+                const responsibilities = Array.isArray(job.responsibilities) ? job.responsibilities.map(r => `- ${r}`).join("\n") : (job.responsibilities || ''); // Handle responsibilities array or string
+                return `Title: ${title}\nCompany: ${company}\nLocation: ${location}\nPeriod: ${period}\nResponsibilities:\n${responsibilities}`;
+             }).join("\n\n---\n\n"); // Separator between jobs
         } else if (typeof editedData.experience === 'string') {
-             experienceString = editedData.experience; // Handle case where it might already be a string
+             // If it's already a string (e.g., from AI fallback or direct edit)
+             experienceString = editedData.experience;
+        } else if (Array.isArray(editedData.experience)) {
+            // Handle case where it might be an array of strings
+            experienceString = editedData.experience.join("\n\n---\n\n");
         }
 
         return (
             <textarea
-                name="experience" // This needs special handling in handleEditedChange if you want to parse it back into objects
+                name="experience"
                 value={experienceString}
                 onChange={(e) => {
-                     // Basic handling: update the string directly.
-                     // A more complex solution would parse this back into the object structure on change or before saving/downloading.
+                     // Simple update: treat experience as a single string block in the state when edited here.
+                     // The robust lambda-pdf can handle this string.
+                     // For better editing, implement parsing back to object structure.
                      setEditedData({ ...editedData, experience: e.target.value });
                 }}
-                rows={10} // More rows for experience
+                rows={10}
                 className="edit-area"
-                placeholder="Experience (Job Title, Company, Dates, Responsibilities)"
+                placeholder="Experience details (e.g., Title: ..., Company: ..., Responsibilities: - ...)"
                 disabled={loading}
             />
         );
@@ -208,13 +216,46 @@ function App() {
             <h1>AI Resume Generator</h1>
             <p className="subheading">Generate an ATS-friendly resume tailored to a job description.</p>
 
+            {/* --- Informational Sections --- */}
+            <div className="info-section-container">
+                <div className="info-card why-use">
+                    <h2>Beat the Bots & Get Noticed!</h2>
+                    <p>Did you know many companies use Applicant Tracking Systems (ATS) to scan resumes before a human ever sees them? These systems look for specific keywords and formats related to the job description. A generic resume might get automatically rejected!</p>
+                    <p>This AI Resume Generator helps you create <strong>ATS-compliant resumes tailored specifically to the job you're applying for.</strong> By aligning your skills and experience with the employer's requirements, you significantly increase your chances of:</p>
+                    <ul>
+                        <li>Passing the initial ATS screening.</li>
+                        <li>Getting your resume in front of a hiring manager.</li>
+                        <li>Receiving that important callback!</li>
+                    </ul>
+                    <p><em>Remember to <strong>update your resume details for each job application</strong> using the provided job description for the best results.</em></p>
+                </div>
+
+                <div className="info-card how-to-use">
+                    <h2>How to Use This App</h2>
+                     <ol>
+                        <li><strong>Personal Details:</strong> Fill in your <code>Name</code>, <code>Email</code>, <code>Phone</code>, and optionally your <code>LinkedIn</code> profile URL.</li>
+                        <li><strong>Education:</strong> Enter your degree(s), institution(s), location, completion year(s), etc. List each qualification on a new line.</li>
+                        <li><strong>Experience:</strong> For each role, provide <code>Company Name</code>, <code>Job Title</code>, <code>Location</code>, <code>Dates</code>, and <code>Key Responsibilities & Achievements</code> (use bullet points). Enter each job as a separate block.</li>
+                        <li><strong>Skills:</strong> List relevant technical and soft skills, separated clearly (e.g., with commas).</li>
+                        <li><strong>Job Description:</strong> <strong>Paste the entire job description</strong> here. This is essential for tailoring.</li>
+                        <li><strong>Optional Fields:</strong> Add <code>Certifications</code>, <code>Languages</code>, or <code>Extracurricular</code> activities if relevant.</li>
+                        <li><strong>Generate:</strong> Click "Generate Resume".</li>
+                        <li><strong>Review & Edit:</strong> Carefully check and modify the generated resume in the preview section below.</li>
+                        <li><strong>Download:</strong> Click "Download PDF" when ready.</li>
+                    </ol>
+                </div>
+            </div>
+            {/* --- END Informational Sections --- */}
+
+
              {/* Display Error Messages */}
              {error && <div className="error-toast">{error}</div>}
 
              {/* Display Success Messages */}
-             {successMessage && !loading && <div className="success-toast">{successMessage}</div>} {/* Hide success during loading */}
+             {successMessage && !loading && <div className="success-toast">{successMessage}</div>}
 
 
+            {/* --- Form Stage --- */}
             {stage === "form" && (
                 <div className="form">
                     {Object.keys(formData).map((field) => (
@@ -223,11 +264,11 @@ function App() {
                             <textarea
                                 id={field}
                                 name={field}
-                                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}...`}
+                                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}... ${field === 'experience' ? '(separate roles clearly)' : ''}`}
                                 value={formData[field]}
                                 onChange={handleChange}
-                                rows={field === "experience" || field === "jobDescription" ? 5 : 2} // More rows for larger fields
-                                required={['name', 'email', 'experience', 'skills', 'jobDescription'].includes(field)} // Add basic required indication
+                                rows={field === "experience" || field === "jobDescription" ? 5 : 2}
+                                required={['name', 'email', 'experience', 'skills', 'jobDescription'].includes(field)}
                                 disabled={loading}
                             />
                          </div>
@@ -244,29 +285,32 @@ function App() {
                     {loading && <div className="loader">✨ Analyzing your input and crafting your resume...</div>}
                 </div>
             )}
+            {/* --- END Form Stage --- */}
 
+
+            {/* --- Preview Stage --- */}
             {stage === "preview" && editedData && (
                 <div className="resume-card">
                     {/* --- Header --- */}
                     <div className="resume-header">
-                         <label htmlFor="name">Full Name</label>
+                         <label htmlFor="preview-name">Full Name</label>
                         <input
-                            type="text" id="name" name="name"
+                            type="text" id="preview-name" name="name"
                             value={editedData.name || ''} onChange={handleEditedChange}
                             className="edit-field name-field" placeholder="Full Name" disabled={loading}
                         />
-                         <label htmlFor="currentRole">Current Role / Target Role</label>
+                         <label htmlFor="preview-role">Current Role / Target Role</label>
                         <input
-                            type="text" id="currentRole" name="currentRole"
+                            type="text" id="preview-role" name="currentRole"
                             value={editedData.currentRole || ''} onChange={handleEditedChange}
                             className="edit-field role-field" placeholder="Current or Target Role" disabled={loading}
                          />
                          <div className="contact-info">
-                            <label htmlFor="phone">Contact</label>
+                            <label htmlFor="preview-phone">Contact</label>
                             <div>
-                                📞 <input type="tel" id="phone" name="phone" value={editedData.phone || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Phone" disabled={loading} /> |
-                                ✉️ <input type="email" id="email" name="email" value={editedData.email || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Email" disabled={loading}/> |
-                                🔗 <input type="url" id="linkedin" name="linkedin" value={editedData.linkedin || ''} onChange={handleEditedChange} className="edit-inline" placeholder="LinkedIn URL (Optional)" disabled={loading}/>
+                                📞 <input type="tel" id="preview-phone" name="phone" value={editedData.phone || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Phone" disabled={loading} /> |
+                                ✉️ <input type="email" id="preview-email" name="email" value={editedData.email || ''} onChange={handleEditedChange} className="edit-inline" placeholder="Email" disabled={loading}/> |
+                                🔗 <input type="url" id="preview-linkedin" name="linkedin" value={editedData.linkedin || ''} onChange={handleEditedChange} className="edit-inline" placeholder="LinkedIn URL (Optional)" disabled={loading}/>
                             </div>
                          </div>
                     </div>
@@ -281,7 +325,7 @@ function App() {
                     <hr />
                     <section>
                         <h3>Skills</h3>
-                         {renderTextArea("skills", 3)} {/* Render skills joined by comma */}
+                         {renderTextArea("skills", 3)} {/* Render skills */}
                     </section>
 
                     <hr />
@@ -293,12 +337,12 @@ function App() {
                      <hr />
                     <section>
                         <h3>Education</h3>
-                         {renderTextArea("education", 3)} {/* Render education joined by newline */}
+                         {renderTextArea("education", 3)} {/* Render education */}
                     </section>
 
 
                     {/* Optional Sections - Render based on presence */}
-                    {editedData.certifications && editedData.certifications.length > 0 && (
+                    { (editedData.certifications && (Array.isArray(editedData.certifications) ? editedData.certifications.length > 0 : String(editedData.certifications).trim() !== '')) && (
                         <>
                             <hr />
                             <section>
@@ -308,7 +352,7 @@ function App() {
                         </>
                     )}
 
-                    {editedData.languages && editedData.languages.length > 0 && (
+                    { (editedData.languages && (Array.isArray(editedData.languages) ? editedData.languages.length > 0 : String(editedData.languages).trim() !== '')) && (
                          <>
                             <hr />
                             <section>
@@ -318,7 +362,7 @@ function App() {
                         </>
                     )}
 
-                    {editedData.extracurricular && editedData.extracurricular.length > 0 && (
+                    { (editedData.extracurricular && (Array.isArray(editedData.extracurricular) ? editedData.extracurricular.length > 0 : String(editedData.extracurricular).trim() !== '')) && (
                          <>
                              <hr />
                             <section>
@@ -331,7 +375,7 @@ function App() {
 
                     {/* --- Buttons --- */}
                     <div className="button-group preview-buttons">
-                        <button onClick={() => setStage("form")} disabled={loading} className="back-btn">
+                        <button onClick={() => { setStage("form"); setError(''); setSuccessMessage('');}} disabled={loading} className="back-btn">
                             &larr; Back to Edit Input
                         </button>
                          <button onClick={handleReset} className="reset-btn" disabled={loading}>
@@ -345,9 +389,10 @@ function App() {
                     {loading && <div className="loader">Processing...</div>}
                 </div>
             )}
+             {/* --- END Preview Stage --- */}
 
-        </div>
-    );
-}
+        </div> // End container
+    ); // End return
+} // End App
 
 export default App;
