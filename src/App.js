@@ -7,6 +7,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const [generationProgress, setGenerationProgress] = useState(null);
 
   // Direct API Gateway endpoint (no Amplify config needed)
   const API_ENDPOINT = 'https://bkp7t6rf5f.execute-api.us-east-1.amazonaws.com/dev/generate-doc';
@@ -16,14 +17,15 @@ function App() {
     setIsLoading(true);
     setError('');
     setResult(null);
+    setGenerationProgress('Initiating document generation...');
 
     try {
+      // Start the document generation process
+      setGenerationProgress('Submitting request to API...');
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add if using API keys:
-          // 'x-api-key': 'YOUR_API_KEY' 
         },
         body: JSON.stringify({
           project_name: projectName,
@@ -35,13 +37,35 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      setGenerationProgress('Processing API response...');
       const data = await response.json();
+      
+      // Check if the response contains the expected URLs
+      if (!data.previewUrl || !data.documentUrl) {
+        throw new Error('Response missing document URLs');
+      }
+
+      // Validate URLs are properly formatted
+      try {
+        new URL(data.previewUrl);
+        new URL(data.documentUrl);
+      } catch (e) {
+        throw new Error('Invalid document URLs received');
+      }
+
+      setGenerationProgress('Document generation completed! Loading preview...');
       setResult(data);
+
+      // Pre-load the preview to validate it works
+      const preloadPreview = new Image();
+      preloadPreview.src = data.previewUrl;
+      
     } catch (err) {
       console.error('API Error:', err);
       setError(err.message || 'Failed to generate document');
     } finally {
       setIsLoading(false);
+      setGenerationProgress(null);
     }
   };
 
@@ -94,6 +118,13 @@ function App() {
           </div>
         </form>
 
+        {generationProgress && (
+          <div className="progress-message">
+            <span className="spinner small"></span>
+            <p>{generationProgress}</p>
+          </div>
+        )}
+
         {error && (
           <div className="error-message">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -112,7 +143,7 @@ function App() {
                 </svg>
                 Document Generated!
               </h2>
-              <p>Review your architecture document below</p>
+              <p>Your architecture document is ready</p>
             </div>
             
             <div className="preview-section">
@@ -134,12 +165,19 @@ function App() {
                 </a>
               </div>
               
-              <iframe
-                src={result.previewUrl}
-                title="Document Preview"
-                className="preview-iframe"
-                sandbox="allow-same-origin allow-scripts"
-              />
+              <div className="iframe-container">
+                <div className="iframe-fallback">
+                  <p>Preview may not display inline due to security settings.</p>
+                  <p>Please use the "Open Preview in New Tab" button above to view the document.</p>
+                </div>
+                <iframe
+                  src={result.previewUrl}
+                  title="Document Preview"
+                  className="preview-iframe"
+                  sandbox="allow-same-origin allow-scripts"
+                  onError={() => console.error("iframe failed to load")}
+                />
+              </div>
             </div>
           </div>
         )}
