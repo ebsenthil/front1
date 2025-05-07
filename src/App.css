@@ -1,42 +1,104 @@
-/* App.css */
+/* Global Styles & Variables */
+:root {
+  --primary-color: #007bff; /* A vibrant blue */
+  --primary-hover-color: #0056b3;
+  --secondary-color: #6c757d; /* Muted gray for less emphasis */
+  --accent-color: #28a745; /* Green for success */
+  --danger-color: #dc3545; /* Red for errors */
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --text-color: #212529;
+  --text-muted-color: #6c757d;
+  --border-color: #dee2e6;
+  --background-color: #ffffff;
+  --form-background-color: #fdfdff; /* Slightly off-white for form sections */
+  --input-background-color: #fff;
+  --input-focus-border-color: #80bdff;
+  --input-focus-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+
+  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --box-shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+  --box-shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
+  --border-radius: .375rem; /* Consistent border radius */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans-serif);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--light-color); /* Light gray background for the page */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* App Container */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* Header */
 .app-header {
-  background-color: #0f172a;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%); /* Gradient for modern feel */
   color: white;
-  padding: 2rem;
+  padding: 2rem 1.5rem;
   text-align: center;
+  box-shadow: var(--box-shadow-md);
 }
 
 .app-header h1 {
-  margin: 0;
-  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  font-weight: 600;
 }
 
 .app-header p {
-  margin-top: 0.5rem;
-  opacity: 0.8;
+  margin: 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
 }
 
+/* Main Content */
 .app-main {
-  flex: 1;
-  padding: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-  width: 100%;
+  flex-grow: 1;
+  padding: 2rem 1rem;
+  max-width: 900px; /* Max width for better readability on large screens */
+  width: 90%;
+  margin: 2rem auto; /* Center content */
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-md);
 }
 
+/* Document Form */
 .document-form {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Spacing between form sections */
+}
+
+.form-section {
+  background-color: var(--form-background-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.form-section-title {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  display: inline-block;
 }
 
 .form-group {
@@ -45,230 +107,164 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #334155;
+  margin-bottom: 0.5rem;
+  color: var(--dark-color);
 }
 
-.form-group input,
+.form-group label::after {
+ content: ""; /* Remove the default asterisk */
+}
+
+.form-group input[required] + label::after,
+.form-group textarea[required] + label::after,
+label[htmlFor="projectName"]::after, /* Explicitly for project name if structure changes */
+label[htmlFor="projectRequirements"]::after {
+    /* No custom styling needed if you type asterisk in label text directly */
+}
+
+
+.form-group input[type="text"],
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  font-family: inherit;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--input-background-color);
+  background-clip: padding-box;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  box-sizing: border-box; /* Ensure padding doesn't expand element */
 }
 
-.form-group input:focus,
+.form-group input[type="text"]:focus,
 .form-group textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  color: var(--text-color);
+  background-color: var(--input-background-color);
+  border-color: var(--input-focus-border-color);
+  outline: 0;
+  box-shadow: var(--input-focus-box-shadow);
 }
 
+.form-group textarea {
+  resize: vertical; /* Allow vertical resize */
+  min-height: 100px;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted-color);
+  opacity: 0.8;
+}
+
+/* Form Actions & Button */
 .form-actions {
-  display: flex;
-  justify-content: flex-end;
+  text-align: right; /* Align button to the right */
+  margin-top: 1rem;
 }
 
-.generate-button {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
+.submit-button {
+  display: inline-flex; /* For aligning spinner and text */
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color .15s ease-in-out, transform 0.1s ease;
+  box-shadow: var(--box-shadow-sm);
 }
 
-.generate-button:hover {
-  background-color: #2563eb;
+.submit-button:hover:not(:disabled) {
+  background-color: var(--primary-hover-color);
+  transform: translateY(-1px);
 }
 
-.generate-button:disabled {
-  background-color: #93c5fd;
+.submit-button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+.submit-button:disabled {
+  background-color: var(--secondary-color);
   cursor: not-allowed;
+  opacity: 0.65;
 }
 
+.submit-button.loading {
+  /* Styles for loading state are handled by spinner and text */
+}
+
+/* Spinner for Button */
 .spinner {
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.75em; /* Space between spinner and text */
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top: 2px solid white;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-}
-
-.spinner.small {
-  width: 12px;
-  height: 12px;
-  border-width: 2px;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.error-message {
-  background-color: #fee2e2;
-  border-left: 4px solid #ef4444;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
+/* Submission Status Messages */
+.submission-status-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  margin-top: 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: var(--box-shadow-sm);
 }
 
-.error-message svg {
-  fill: #ef4444;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+.submission-status-message svg {
+  margin-right: 0.75rem;
+  min-width: 24px; /* Prevent squishing */
 }
 
-.error-message p {
+.submission-status-message.success {
+  background-color: #e9f7ef; /* Light green */
+  color: #1d7b47; /* Darker green for text */
+  border: 1px solid var(--accent-color);
+}
+.submission-status-message.success svg {
+  fill: var(--accent-color);
+}
+
+.submission-status-message.error {
+  background-color: #fdecea; /* Light red */
+  color: #a02d37; /* Darker red for text */
+  border: 1px solid var(--danger-color);
+}
+.submission-status-message.error svg {
+  fill: var(--danger-color);
+}
+
+.submission-status-message p {
   margin: 0;
-  color: #7f1d1d;
 }
 
-.progress-message {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background-color: #f0f9ff;
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
-}
 
-.progress-message p {
-  margin: 0;
-  color: #0c4a6e;
-}
-
-.result-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
-  overflow: hidden;
-}
-
-.result-header {
-  background-color: #ecfdf5;
-  padding: 1.5rem;
-  border-bottom: 1px solid #d1fae5;
-}
-
-.result-header h2 {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #065f46;
-  font-size: 1.25rem;
-}
-
-.result-header svg {
-  fill: #059669;
-  width: 24px;
-  height: 24px;
-}
-
-.result-header p {
-  margin: 0.5rem 0 0;
-  color: #047857;
-}
-
-.preview-section {
-  padding: 1.5rem;
-}
-
-.preview-actions {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.preview-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: #3b82f6;
-  font-weight: 500;
-}
-
-.preview-link:hover {
-  text-decoration: underline;
-}
-
-.download-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-
-.download-button:hover {
-  background-color: #2563eb;
-}
-
-.iframe-container {
-  position: relative;
-  height: 500px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.iframe-fallback {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #f8fafc;
-  z-index: 1;
-  padding: 2rem;
-  text-align: center;
-}
-
-.preview-iframe {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border: none;
-  z-index: 2;
-}
-
+/* Footer */
 .app-footer {
-  background-color: #f1f5f9;
-  padding: 1.5rem;
+  background-color: var(--dark-color);
+  color: var(--light-color);
+  padding: 1.5rem 1rem;
   text-align: center;
-  margin-top: auto;
+  margin-top: auto; /* Pushes footer to the bottom */
 }
 
 .footer-content {
@@ -277,20 +273,60 @@
 }
 
 .footer-content p {
-  margin: 0 0 0.5rem;
-  color: #64748b;
-}
-
-.tech-stack {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
 }
 
 .tech-stack span {
-  background-color: #e2e8f0;
-  padding: 0.25rem 0.75rem;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  color: #475569;
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ccc; /* Lighter gray for tech stack tags */
+  padding: 0.25rem 0.6rem;
+  margin: 0.25rem;
+  border-radius: 1rem; /* Pill shape */
+  font-size: 0.8rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 2rem;
+  }
+  .app-header p {
+    font-size: 1rem;
+  }
+  .app-main {
+    width: 95%;
+    padding: 1.5rem 0.75rem;
+    margin: 1rem auto;
+  }
+  .form-section {
+    padding: 1rem;
+  }
+  .form-section-title {
+    font-size: 1.3rem;
+  }
+  .submit-button {
+    width: 100%; /* Full width button on smaller screens */
+    padding: 0.85rem 1rem;
+  }
+  .form-actions {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 1.5rem 1rem;
+  }
+  .app-header h1 {
+    font-size: 1.75rem;
+  }
+   .app-header p {
+    font-size: 0.9rem;
+  }
+  .tech-stack span {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
 }
