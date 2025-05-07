@@ -11,7 +11,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [submissionStatus, setSubmissionStatus] = useState(''); // To show success/failure message
+  const [submissionStatus, setSubmissionStatus] = useState('');
 
   // Direct API Gateway endpoint
   const API_ENDPOINT = 'https://bkp7t6rf5f.execute-api.us-east-1.amazonaws.com/dev/generate-doc';
@@ -24,7 +24,6 @@ function App() {
     setSubmissionStatus('');
 
     // Combine all detail fields into a single string for the backend
-    // You might want to format this string more clearly, e.g., with markdown-like headers
     const combinedProjectDetails = `
 ## Project Requirements
 ${projectRequirements}
@@ -43,36 +42,25 @@ ${architecturalDecisionAreas}
     `;
 
     try {
-      const response = await fetch(API_ENDPOINT, {
+      // Start the fetch but don't await it - we'll show success message immediately
+      fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           project_name: projectName,
-          project_details: combinedProjectDetails.trim(), // Send combined details
+          project_details: combinedProjectDetails.trim(),
         }),
+      }).catch(err => {
+        console.error('API Error (background):', err);
+        // We don't show this error to the user since we already showed success
       });
-
-      // Check if the request was accepted (e.g., 200 OK or 202 Accepted)
-      // Lambda might return 200 if it successfully started the process,
-      // or 202 if API Gateway is set up for async invocation.
-      if (!response.ok) {
-        // Try to get error message from response body if available
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        try {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
-            // console.warn("Could not parse error response JSON:", parseError);
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Assuming the API Gateway & Lambda handle the request asynchronously
-      // and return a success response immediately.
+      
+      // Show success message immediately without waiting for API response
       setSubmissionStatus(`Request submitted successfully! Check the generated document in the "${S3_BUCKET_NAME}" S3 bucket shortly.`);
-      // Clear form fields after successful submission
+      
+      // Clear form fields after submission
       setProjectName('');
       setProjectRequirements('');
       setNonFunctionalRequirements('');
@@ -81,7 +69,7 @@ ${architecturalDecisionAreas}
       setArchitecturalDecisionAreas('');
 
     } catch (err) {
-      console.error('API Error:', err);
+      console.error('Submission Error:', err);
       setError(err.message || 'Failed to submit document generation request.');
       setSubmissionStatus(''); // Clear any previous success message
     } finally {
